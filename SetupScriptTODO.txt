@@ -1,0 +1,98 @@
+Windows Setup Script:
+=====================
+
+ -----
+|TODO:|
+ -----
+
+1. set up permissions checks (must run as admin) - Done :D
+
+2. determine the linux uses and windows alternatives for the following directories 5/25:
+	i.	/usr/bin
+        ii.	/etc/cron.d (is this even necessary?)
+	iii.	/etc
+	iv.	/usr/share
+	v.	/var/log
+	vi.	/var/run
+	vii.	/etc/init.d 
+	viii.	/etc/default
+
+3. create windows alternatives for all directories (except potentially cron) 5/26
+
+4. translate methods 5/27:
+	i.	download_jar()
+	ii.	download_dependencies
+	iii.	do_build()
+	iv.	do_uninstall()
+	v.	do_install()
+	vi.	usage()
+	vii.	fail()
+
+
+5. routing for parameters 5/28
+
+6. Test for failures within the java agent code 5/28
+
+ -----------------
+|global variables:|
+ -----------------
+
+daemon_name - name of the kinesis agent daemon, not sure if necessary for windows
+
+agent_user_name - name of the user that runs the agent
+
+bin_dir - ?? need to find /usr/bin analog in windows
+
+cron_dir - cron directory, not sure if necessary for windows
+
+config_dir - location of agent config file, need to find an analog to /etc
+
+jar_dir - location of jar file, need to find /usr/share analog in windows
+
+dependencies_dir - dependencies location, located in same dir as setup script
+
+log_dir - log location, need to find /var/log analog in windows
+
+init_dir - init directory, need to find windows analog to /etc/init.d
+
+sysconfig_dir - syslog directory, need to find windows analog to /etc/default
+
+state_dir - not sure what this is (may be the checkpoint directory), need to find windows analog to /var/run
+
+agent_service - not sure what this is, need to find analog for init dir in windows
+
+ ----------
+|functions:|
+ ----------
+
+usage() - prints proper usage of the script. Basically need to be completely redone for windows
+
+fail() - print error message and exit the script
+
+download_jar() - downloads jar dependencies for the agent from maven URL based on filepath. Filepath can use unix standard since it goes into a url. Need to find wget alternative. Downlods all files to the dependencies directory
+	inputs: group ID, Artifact ID, Version
+
+download_dependencies() -  iterates over all dependencies and installs them by calling 'download_jar()'. Looks fairly simple
+
+do_uninstall() - uninstalls the daemon.
+		1. stop currently running agent
+		2. remove state_dir, log_dir, jar_dir, agent_service, bin_dir.start-<daemon_name>
+		3. delete the agent user
+		4. remove the sysconfig entry for daemon_name
+		5. remove ${bin_dir}/${daemon_name}-babysit and ${cron_dir}/${daemon_name} to disable cron
+
+do_build() - call download dependencies then 'ant || fail "message"' not sure what this does
+
+do_install() - 1. call do_uninstall
+	       2. create all globally defined directories and files
+	       4. create the user for running the agend
+	       5. Give the user permissions to access the logs and checkpoint file
+	       6. Create the config file under config_dir/agent.json ([ -f ${config_file} ]] || install -m644 ./configuration/release/${daemon_name}.json ${config_file} <- what does this do?)
+	       7. Print completion message
+
+
+
+
+
+
+
